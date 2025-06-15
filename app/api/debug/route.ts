@@ -8,7 +8,7 @@ const corsHeaders = {
   'Access-Control-Allow-Credentials': 'true',
 };
 
-export async function OPTIONS(request: NextRequest) {
+export async function OPTIONS() {
   return new NextResponse(null, {
     status: 200,
     headers: corsHeaders,
@@ -42,8 +42,8 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const contentType = request.headers.get('content-type');
-    let body: any = null;
-    let parsedBody: any = null;
+    let body: string | null = null;
+    let parsedBody: Record<string, unknown> | string = {};
     
     // Handle different content types
     if (contentType?.includes('application/json')) {
@@ -56,15 +56,16 @@ export async function POST(request: NextRequest) {
     } else if (contentType?.includes('application/x-www-form-urlencoded')) {
       const formData = await request.formData();
       body = 'FormData received';
-      parsedBody = Object.fromEntries(formData.entries());
+      const formEntries = Object.fromEntries(formData.entries());
+      parsedBody = formEntries;
       
       // Check for LTI-specific parameters
-      if (parsedBody.id_token) {
-        parsedBody._lti_detected = 'LTI 1.3 id_token found';
-        parsedBody._lti_token_preview = parsedBody.id_token.substring(0, 50) + '...';
+      if (formEntries.id_token) {
+        (parsedBody as Record<string, unknown>)._lti_detected = 'LTI 1.3 id_token found';
+        (parsedBody as Record<string, unknown>)._lti_token_preview = (formEntries.id_token as string).substring(0, 50) + '...';
       }
-      if (parsedBody.iss) {
-        parsedBody._lti_issuer = parsedBody.iss;
+      if (formEntries.iss) {
+        (parsedBody as Record<string, unknown>)._lti_issuer = formEntries.iss;
       }
     } else {
       body = await request.text();
@@ -72,6 +73,7 @@ export async function POST(request: NextRequest) {
     }
     
     const headers = Object.fromEntries(request.headers.entries());
+    const formEntries = typeof parsedBody === 'object' ? parsedBody as Record<string, unknown> : {};
     
     const debugInfo = {
       message: "Debug POST endpoint working",
@@ -91,10 +93,10 @@ export async function POST(request: NextRequest) {
         user_agent: headers['user-agent']?.substring(0, 100) || 'None',
       },
       lti_analysis: {
-        has_lti_data: !!(parsedBody?.id_token || parsedBody?.iss || parsedBody?.login_hint),
-        lti_version: parsedBody?.id_token ? 'LTI 1.3' : 'Unknown/LTI 1.1',
-        issuer: parsedBody?.iss || 'Not provided',
-        client_id: parsedBody?.client_id || 'Not provided',
+        has_lti_data: !!(formEntries?.id_token || formEntries?.iss || formEntries?.login_hint),
+        lti_version: formEntries?.id_token ? 'LTI 1.3' : 'Unknown/LTI 1.1',
+        issuer: (formEntries?.iss as string) || 'Not provided',
+        client_id: (formEntries?.client_id as string) || 'Not provided',
       }
     };
     

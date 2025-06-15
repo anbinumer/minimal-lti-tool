@@ -8,7 +8,7 @@ const corsHeaders = {
   'Access-Control-Allow-Credentials': 'true',
 };
 
-export async function OPTIONS(request: NextRequest) {
+export async function OPTIONS() {
   return new NextResponse(null, {
     status: 200,
     headers: corsHeaders,
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
   
   try {
     const contentType = request.headers.get('content-type') || '';
-    let requestData: any = {};
+    let requestData: Record<string, unknown> = {};
     
     if (contentType.includes('application/x-www-form-urlencoded')) {
       // Handle form data
