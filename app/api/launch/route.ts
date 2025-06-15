@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
-  console.log('LTI POST request received');
+  console.log('LTI POST request received at /api/launch');
   
   try {
     // Canvas sends LTI data via POST form data
@@ -27,4 +27,9 @@ export async function POST(request: NextRequest) {
     console.error('LTI POST Error:', error);
     return NextResponse.redirect(new URL('/launch', request.url));
   }
+}
+
+export async function GET(request: NextRequest) {
+  // Direct GET access - redirect to launch page
+  return NextResponse.redirect(new URL('/launch', request.url));
 } 
