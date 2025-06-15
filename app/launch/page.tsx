@@ -1,10 +1,11 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 
-export default function LaunchPage() {
+function LaunchContent() {
   const searchParams = useSearchParams();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [launchInfo, setLaunchInfo] = useState<any>({});
 
   useEffect(() => {
@@ -108,5 +109,13 @@ export default function LaunchPage() {
         </button>
       </div>
     </div>
+  );
+}
+
+export default function LaunchPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LaunchContent />
+    </Suspense>
   );
 } 

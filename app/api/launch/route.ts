@@ -27,9 +27,4 @@ export async function POST(request: NextRequest) {
     console.error('LTI POST Error:', error);
     return NextResponse.redirect(new URL('/launch', request.url));
   }
-}
-
-export async function GET(request: NextRequest) {
-  // Direct GET access - just show the page
-  return NextResponse.redirect(new URL('/launch', request.url));
 } 
